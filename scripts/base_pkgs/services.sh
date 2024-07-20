@@ -7,6 +7,7 @@
 # TODO: Review services
 services=(
     "dbus"
+    "acpid"
 )
 
 for service in "${services[@]}"; do

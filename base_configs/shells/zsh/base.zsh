@@ -95,6 +95,8 @@ alias ai="aider --model ollama_chat/qwen2.5-coder:14b --weak-model ollama_chat/l
 #=== PKG MANAGEMENT ===#
 # TODO: Update with emerge shortcuts
 
+alias compile-kernel="make && make modules_install && make install"
+
 #=== COMMANDS ===#
 alias ls="eza -a --icons"
 alias ll="eza -al --icons"

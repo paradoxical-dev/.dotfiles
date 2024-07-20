@@ -2,6 +2,7 @@
 
 pkg_list=(
     "acpi"
+    "acpid"
     "neovim" 
     "parallel" 
     "ripgrep" 
@@ -12,6 +13,7 @@ pkg_list=(
 # --------------- map packages to repo names
 declare -A pkg_name_map
 pkg_name_map["acpi"]="sys-power/acpi"
+pkg_name_map["acpid"]="sys-power/acpid"
 pkg_name_map["parallel"]="sys-process/parallel"
 pkg_name_map["ripgrep"]="sys-apps/ripgrep"
 pkg_name_map["unzip"]="app-arch/unzip"

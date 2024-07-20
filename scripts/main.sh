@@ -32,7 +32,7 @@ while [[ $# -gt 0 ]]; do
 	;;
     --laptop)
         LAPTOP=0
-        shift 1
+        shift
     ;;
 	*)
 	    echo "Unknown option: $1"
@@ -73,7 +73,7 @@ end="\e[1;0m"
 export PROFILE=$PROFILE
 export PROFILE_DIR=$PROFILE_DIR
 export THEME=$THEME
-export $LAPTOP=$LAPTOP
+export LAPTOP=$LAPTOP
 export CONFIG_DIR=$CONFIG_DIR
 
 # ------ colors
@@ -88,7 +88,6 @@ export color_end=$end
 
 # ------ common commands
 export gum="$HOME/go/bin/gum"
-
 
 # --------------- common functions
 for script in "$HOME/.dotfiles/scripts/functions/"*; do
