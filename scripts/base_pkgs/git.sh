@@ -1,9 +1,5 @@
 #!/bin/bash
 
-command_exists() {
-    command -v "$1" &> /dev/null
-}
-
 git_config() {
     local user_name="$1"
     local user_email="$2"
