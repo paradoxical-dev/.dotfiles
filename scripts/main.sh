@@ -158,11 +158,21 @@ inform_msg() {
     "$@"
 }
 
+input() {
+    local header="$1"
+    local placeholder="$2"
+
+    $gum input --header "$header" --placeholder "$placeholder" \
+    --header.foreground "#0fe" --prompt.foreground "#0fe" \
+    --cursor.foreground "#fff"
+}
+
 export -f command_exists
 export -f unmask_package
 export -f choose_one
 export -f gum_confirm
 export -f spinner
+export -f input
 
 #===============================#
 #          MAIN SCRIPT          #
@@ -185,13 +195,14 @@ else
 fi
 gum_confirm "Would you like to sync the database? [recommended]"
 sync_db=$?
-if [ sync_db -eq 0 ]; then
+if [ $sync_db -eq 0 ]; then
     sudo emerge --sync
 fi
 echo -e "\n"
 
 echo "git and gum packages are required for the remainder of this script"
 echo -e "${cyan}Installing now...${color_end}"
+echo -e "\n"
 $HOME/.dotfiles/scripts/base_pkgs/git.sh
 $HOME/.dotfiles/scripts/base_pkgs/gum.sh
 

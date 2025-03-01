@@ -24,7 +24,6 @@ fi
 
 SYSTEM_USER=$(whoami)
 
-# TODO: update to gum input
 read -p "Enter your Git username for user '$SYSTEM_USER': " user_name
 read -p "Enter your Git email for user '$SYSTEM_USER': " user_email
 

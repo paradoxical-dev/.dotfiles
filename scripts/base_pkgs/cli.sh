@@ -30,7 +30,7 @@ pkg_list=(
 declare -A conf_path_map
 conf_path_map["bottom"]="$CONFIG_DIR/bottom/bottom.toml"
 conf_path_map["eza"]="$CONFIG_DIR/eza/theme.yml"
-conf_path_map["fastfetch"]="$CONFIG_DIR/fastfetch/$THEME.conf"
+conf_path_map["fastfetch"]="$CONFIG_DIR/fastfetch/$THEME.jsonc"
 
 # -------------- map packages to their repo names
 declare -A pkg_name_map
@@ -57,7 +57,7 @@ pkg_name_map["tealdeer"]="app-misc/tealdeer"
 declare -A pkg_conf_map
 pkg_conf_map["bottom"]="$HOME/.dotfiles/base_configs/cli/bottom/$THEME.toml"
 pkg_conf_map["eza"]="$HOME/.dotfiles/base_configs/cli/eza/$THEME.yml"
-pkg_conf_map["fastfetch"]="$HOME/.dotfiles/base_configs/cli/fastfetch/$THEME.conf"
+pkg_conf_map["fastfetch"]="$HOME/.dotfiles/base_configs/cli/fastfetch/$THEME.jsonc"
 
 
 #===================================#
@@ -129,16 +129,21 @@ ddgr_build() {
 
     # TODO: replace with gum input
     while true; do
-        read -p "Where to clone ddgr? (default $HOME/src/ddgr): " clone_location
+        # read -p "Where to clone ddgr? (default $HOME/src/ddgr): " clone_location
+        local clone_location=$(input "Where to clone ddgr? (default $HOME/src/ddgr)" "path/to/repo")
         case $clone_location in
             *)
                 if [[ -z "$clone_location" ]]; then
+                    if [[ ! -e "$HOME/src" ]]; then
+                        echo -e "Creating directory $HOME/src"
+                        mkdir $HOME/src
+                    fi
                     clone_location="$HOME/src/ddgr"
                     break
                 elif [[ -e "$clone_location" ]]; then
                     break
                 else
-                    echo "$clone_location is not a valid path. Please enter a valid path to clone the repo."
+                    echo -e "${red}$clone_location is not a valid path. Please enter a valid path to clone the repo.${color_end}"
                 fi
                 ;;
         esac
@@ -192,10 +197,15 @@ wikiman_build() {
     # TODO: replace with gum input
     echo -e "${cyan}Cloning wikiman repo...${color_end}"
     while true; do
-        read -p "Where to clone wikiman? (default $HOME/src/wikiman): " clone_location
+        # read -p "Where to clone wikiman? (default $HOME/src/wikiman): " clone_location
+        local clone_location=$(input "Where to clone wikiman? (default $HOME/src/wikiman)" "path/to/repo")
         case $clone_location in
             *)
                 if [[ -z "$clone_location" ]]; then
+                    if [[ ! -e "$HOME/src" ]]; then
+                        echo "Creating directory $HOME/src"
+                        mkdir $HOME/src
+                    fi
                     clone_location="$HOME/src/wikiman"
                     break
                 elif [[ -e "$clone_location" ]]; then
