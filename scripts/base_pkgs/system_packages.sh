@@ -22,31 +22,33 @@ neovim_install() {
     command_exists "nvim"
     valid_command=$?
 
-    if [[ $valid_command -eq 0 ]]; then
-        while true; do
-            echo "!!! ENTERING N WILL OVERWRITE CURRENT CONFIG"
-            read -p "Neovim already isntalled. Backup config directory? [y/n]: " backup_neovim
-            case "$backup_neovim" in
-                [Yy])
-                    echo "Moving $CONFIG_DIR/nvim to $CONFIG_DIR/nvim.bak..."
-                    mv "$CONFIG_DIR/nvim" "$CONFIG_DIR/nvim.bak"
-                    echo "Copying configuration into $CONFIG_DIR/nvim..."
-                    cp -r "$nvim_conf_path" "$CONFIG_DIR/nivm"
-                    break
+    if [ $valid_command -eq 0 ]; then
+        cb() {
+            local selection="$1"
+            case "$selection" in
+                "Move config to .bak")
+                    mv "$CONFIG_DIR/nvim" "$CONFIG_DIR/nvim.bak"; 
+                    echo -e "${green}Backup cpmplete${color_end}"
+                    echo "Copying configuration into $CONFIG_DIR/nvim"
+                    cp -r "$nvim_conf_path" "$CONFIG_DIR/nvim"
                     ;;
-                [Nn])
-                    echo "Overwriting $CONFIG_DIR/nvim..." 
+                "Overwrite config")
+                    echo -e "${orange}Overwriting config file at $conf_path with $dot_file...${color_end}"
                     rm -r "$CONFIG_DIR/nvim"
                     cp -r "$nvim_conf_path" "$CONFIG_DIR/nvim"
-                    break
                     ;;
-                *)
-                    echo "Invalud input. Please enter 'y' or 'n'" 
+                "Skip")
+                    echo "Skipping configuration of neovim"
                     ;;
             esac
-        done
+        }
+        local choices=("Move config to .bak" "Overwrite config" "Skip")
+        local prompt="Configuration found for neovim. Next steps?"
+        choose_one "$prompt" cb "${choices[@]}"
+
+        unset -f cb
     else
-        echo "Installing Neovim..."
+        echo -e "${cyan}Installing Neovim...${color_end}"
         sudo emerge --ask --noreplace "app-editors/neovim"
         echo "Copying configuration to $CONFIG_DIR/nvim"
         cp -r "$nvim_conf_path" "$COFNIG_DIR/nvim"
@@ -60,29 +62,31 @@ tmux_install() {
     valid_command=$?
 
     if [[ $valid_command -eq 0 ]]; then
-        while true; do
-            echo "!!! ENTERING N WILL OVERWRITE CURRENT CONFIG"
-            read -p "tmux already isntalled. Backup config? [y/n]: " backup_tmux
-            case "$backup_tmux" in
-                [Yy])
-                    echo "Moving $HOME/.tmux.conf to $HOME/.tmux.conf.bak..."
+        cb() {
+            local selection="$1"
+            case "$selection" in
+                "Move config to .bak")
                     mv "$HOME/.tmux.conf" "$HOME/.tmux.conf.bak"
+                    echo -e "${green}Backup cpmplete${color_end}"
                     echo "Copying configuration into $HOME/.tmux.conf..."
                     cp "$tmux_conf_path" "$HOME/.tmux.conf"
-                    break
                     ;;
-                [Nn])
-                    echo "Overwriting $HOME/.tmux.conf..." 
+                "Overwrite config")
+                    echo -e "${orange}Overwriting $HOME/.tmux.conf...${color_end}" 
                     cp "$tmux_conf_path" "$HOME/.tmux.conf"
-                    break
                     ;;
-                *)
-                    echo "Invalud input. Please enter 'y' or 'n'" 
+                "Skip")
+                    echo "Skipping configuration of tmux"
                     ;;
             esac
-        done
+        }
+        local choices=("Move config to .bak" "Overwrite config" "Skip")
+        local prompt="Configuration found for tmux. Next steps?"
+        choose_one "$prompt" cb "${choices[@]}"
+
+        unset -f cb
     else
-        echo "Installing tmux..."
+        echo "${cyan}Installing tmux...${color_end}"
         sudo emerge --ask --noreplace "app-misc/tmux"
         echo "Copying configuration to $HOME/.tmux.conf"
         cp "$tmux_conf_path" "$HOME/.tmux.conf"
@@ -93,14 +97,18 @@ tmux_install() {
 }
 
 for pkg in "${pkg_list[@]}"; do
+    echo -e "\n"
     if [[ "$pkg" == "neovim" ]]; then
-        echo "calling neovim install"
         neovim_install
     elif [[ "$pkg" == "tmux" ]]; then
         tmux_install
     else
         pkg_name="${pkg_name_map[$pkg]}"
-        echo "Installing $pkg..."
-        sudo emerge --ask --noreplace "$pkg_name"
+        if command_exists "$pkg" || ls /var/db/pkg/*/"$pkg"-* &> /dev/null; then
+            echo -e "${green}$pkg already installed"
+        else
+            echo -e "${cyan}Installing $pkg...${color_end}"
+            sudo emerge --ask --noreplace "$pkg_name"
+        fi
     fi
 done

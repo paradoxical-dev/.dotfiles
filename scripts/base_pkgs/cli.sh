@@ -12,6 +12,7 @@ pkg_list=(
     "ddgr"
     "exiftool"
     "eza"
+    "fastfetch"
     "fd"
     "figlet"
     "file"
@@ -27,7 +28,7 @@ pkg_list=(
 
 # ------------- map packages to their config files
 declare -A conf_path_map
-conf_path_map["BOTtom"]="$CONFIG_DIR/bottom/bottom.toml"
+conf_path_map["bottom"]="$CONFIG_DIR/bottom/bottom.toml"
 conf_path_map["eza"]="$CONFIG_DIR/eza/theme.yml"
 conf_path_map["fastfetch"]="$CONFIG_DIR/fastfetch/$THEME.conf"
 
@@ -39,15 +40,17 @@ pkg_name_map["bottom"]="sys-process/bottom"
 pkg_name_map["chafa"]="media-gfx/chafa"
 pkg_name_map["exiftool"]="media-libs/exiftool"
 pkg_name_map["eza"]="sys-apps/eza"
+pkg_name_map["fastfetch"]="app-misc/fastfetch"
 pkg_name_map["fd"]="sys-apps/fd"
 pkg_name_map["figlet"]="app-misc/figlet"
 pkg_name_map["file"]="sys-apps/file"
 pkg_name_map["fzf"]="app-shells/fzf"
 pkg_name_map["jq"]="app-misc/jq"
 pkg_name_map["lesspipe"]="app-text/lesspipe"
-pkg_name_map["lm-sensors"]="sys-apps/lm-sensors"
+pkg_name_map["lm_sensors"]="sys-apps/lm-sensors"
 pkg_name_map["lshw"]="sys-apps/lshw"
 pkg_name_map["smartmontools"]="sys-apps/smartmontools"
+pkg_name_map["tealdeer"]="app-misc/tealdeer"
 
 
 # -------------- map dotfiles to package names
@@ -62,40 +65,42 @@ pkg_conf_map["fastfetch"]="$HOME/.dotfiles/base_configs/cli/fastfetch/$THEME.con
 #====================================
 
 # -------------- what to do if a package is already installed
+# TODO: Make more modular and move to common functions
 handle_backups(){
     local conf_path="${conf_path_map[$1]}"
     local dot_file="${pkg_conf_map[$1]}"
 
     if [[ ! -z "$conf_path" ]]; then
         if [[ -e "$conf_path" ]]; then
-            while true; do
-                read -p "Config file found for $1, move to .bak? [y/n]: " backup_config
-                case "$backup_config" in
-                    [Yy]) 
+
+            cb() {
+                local selection="$1"
+                case "$selection" in
+                    "Move config to .bak")
                         mv "$conf_path" "$conf_path.bak"; 
+                        echo -e "$green Backup cpmplete"
                         echo "Copying config file $dot_file to $conf_path"
                         cp "$dot_file" "$conf_path"
-                        break 
                         ;;
-                    [Nn]) 
-                        echo "Overwriting config file at $conf_path with $dot_file..."
+                    "Overwrite config")
+                        echo -e "${orange}Overwriting config file at $conf_path with $dot_file...${color_end}"
                         cp "$dot_file" "$conf_path"
-                        if [ $? -eq 1 ]; then
-                            mkdir -p $conf_path
-                            cp "$dot_file" "$conf_path"
-                        fi
-                        break 
                         ;;
-                    *) 
-                        echo "Invalud input. Please enter 'y' or 'n'" 
+                    "Skip")
+                        echo "Skipping configuration of $1"
                         ;;
                 esac
-            done
+            }
+            local choices=("Move config to .bak" "Overwrite config" "Skip")
+            local prompt="Config file found for $1. Next steps?"
+            choose_one "$prompt" cb "${choices[@]}"
+
+            unset -f cb
+
         elif [[ ! -z "$dot_file" && -e $dot_file ]]; then
-            echo "Copying config file $dot_file to $conf_path"
-            cp "$dot_file" "$conf_path"
-            if [ $? -eq 1 ]; then
-                echo "No directory $conf_path. Creating directory"
+            echo "Copying config file $dot_file to $conf_path..."
+            if ! cp "$dot_file" "$conf_path"; then
+                echo -e "${orange}No directory $conf_path. Creating directory...${color_end}"
                 mkdir -p "$conf_path"
                 cp "$dot_file" "$conf_path"
             fi
@@ -105,8 +110,15 @@ handle_backups(){
     fi
 }
 
-# ------------- build ddgr from source
+# -------------- build ddgr from source
 ddgr_build() {
+    gum_confirm "No ebuild found for ddgr. Build from source?"
+    local res=$?
+    if [ $res -eq 1 ]; then
+        echo "Skipping installation..."
+        return 0
+    fi
+
     local repo_url="https://github.com/jarun/ddgr"
     local python_exists=command_exists "python"
 
@@ -115,12 +127,13 @@ ddgr_build() {
         sudo emerge --ask --noreplace "dev/lang-python"
     fi
 
+    # TODO: replace with gum input
     while true; do
         read -p "Where to clone ddgr? (default $HOME/src/ddgr): " clone_location
         case $clone_location in
             *)
                 if [[ -z "$clone_location" ]]; then
-                    $clone_location="$HOME/src/ddgr"
+                    clone_location="$HOME/src/ddgr"
                     break
                 elif [[ -e "$clone_location" ]]; then
                     break
@@ -131,15 +144,22 @@ ddgr_build() {
         esac
     done
 
-    echo "Cloning latest repo into $clone_location..."
+    echo -e "${teal}Cloning ddgr repo into $clone_location...${color_end}"
     git clone "$repo_url" "$clone_location"
     cd "$clone_location"
-    echo "Installing ddgr..."
-    sudo make install
+    echo -e "${teal}Installing ddgr...${color_end}"
+    spinner "Installing ddgr..." sudo make install
 }
 
-# -------------- build wikiman from source
+# -------------- build wikiman from source or skip
 wikiman_build() {
+    gum_confirm "No ebuild present for wikiman. Build from source?"
+    local res=$?
+    if [ $res -eq 1 ]; then
+        echo "Skipping installation..."
+        return 0
+    fi
+
     local repo_url="https://github.com/filiparag/wikiman"
     local deps=(
         "man"
@@ -162,24 +182,26 @@ wikiman_build() {
 
     echo "Checking dependencies..."
     for pkg in "${deps[@]}"; do
-        if ! ls /var/db/pkg/*/"$pkg"-* &>/dev/null; then
-            echo "Dependency $pkg not installed. Installing now..."
+        local pkg_name="${dep_name_map[$pkg]}"
+        if ! ls /var/db/pkg/*/"$pkg"-* &> /dev/null; then
+            echo -e "${orange}Dependency $pkg not installed. Installing now...${color_end}"
             sudo emerge --ask --noreplace "$pkg_name"
         fi
     done
 
-    echo "Cloning wikiman repo..."
+    # TODO: replace with gum input
+    echo -e "${cyan}Cloning wikiman repo...${color_end}"
     while true; do
         read -p "Where to clone wikiman? (default $HOME/src/wikiman): " clone_location
         case $clone_location in
             *)
                 if [[ -z "$clone_location" ]]; then
-                    $clone_location="$HOME/src/wikiman"
+                    clone_location="$HOME/src/wikiman"
                     break
                 elif [[ -e "$clone_location" ]]; then
                     break
                 else
-                    echo "$clone_location is not a valid path. Please enter a valid path to clone the repo."
+                    echo "${red}$clone_location is not a valid path. Please enter a valid path to clone the repo.$color_end"
                 fi
                 ;;
         esac
@@ -187,12 +209,71 @@ wikiman_build() {
 
     git clone "$repo_url" "$clone_location"
     cd "$clone_location"
-    echo "Installing wikiman..."
-    sudo make all
-    sudo make install
+    spinner "Installing wikiman" sudo make all && sudo make install
+
+    # TODO: Create sources install option
 }
 
+# -------------- handle how to install tealdeer
+handle_tealdeer() {
+    cb() {
+        local selection=$1
+        case "$selection" in
+            "Skip install")
+                echo -e "${orange}Skipping tealdeer installation${color_end}"
+                ;;
+            "Unmask package")
+                local tealdeer_pkg="${pkg_name_map[tealdeer]}"
+                sudo echo "$tealdeer_pkg ~amd64" >> /etc/portage/package.accept_keywords/tealdeer
+                echo -e "${green}Package unmasked with /etc/portage/package.accept_keywords/tealdeer${color_end}"
+                echo -e "${cyan}Installing tealdeer...${color_end}"
+                sudo emerge --ask --noreplace "$tealdeer_pkg"
+                ;;
+            "Build with cargo")
+                if command_exists "cargo"; then
+                    echo -e "${cyan}Installing tealdeer..."
+                    cargo install tealdeer
+                else
+                    echo -e "${orange}Cargo not available. Emerging latest rust version..."
+                    sudo emerge --ask --noreplace "dev-lang/rust"
+                    echo -e "${cyan}Installing tealdeer...${color_end}"
+                    cargo install tealdeer
+                fi
+        esac
+    }
 
+    local methods=("$@")
+    local prompt="Package tealdeer is masked by keyword ~amd64. How to proceed?"
+    choose_one "$prompt" cb "${methods[@]}"
+
+    unset -f cb
+}
+
+# -------------- handle edge case faciliation
+handle_edge() {
+    local case="$1"
+    if [[ "$case" == "ddgr" ]]; then
+        if command_exists "ddgr"; then
+            echp -e "${green}ddgr already installed"
+        else
+            ddgr_build
+        fi
+    elif [[ "$case" == "tealdeer" ]]; then
+        if [[ -e "$HOME/.cargo/bin/tldr" || $(command_exists "tldr") ]]; then
+            echo -e "${green}tealdeer already installed${color_end}"
+        else
+            echo -e "${cyan}Installing tealdeer${color_end}"
+            local methods=("Skip install" "Unmask package" "Build with Cargo")
+            handle_tealdeer "${methods[@]}"
+        fi
+    elif [[ "$case" == "wikiman" ]]; then
+        if  command_exists "wikiman"; then
+            echo -e "${green}wikiman already installed${color_end}"
+        else
+            wikiman_build
+        fi
+    fi
+}
 
 #==========================#
 #       MAIN SCRIPT        #
@@ -200,6 +281,8 @@ wikiman_build() {
 
 main() {
     for pkg in "${pkg_list[@]}"; do
+        echo -e "\n"
+
         local pkg_name="${pkg_name_map[$pkg]}"
         local dot_file="${pkg_conf_map[$pkg]}"
         local conf_path="${conf_path_map[$pkg]}"
@@ -208,39 +291,32 @@ main() {
             local valid_command
             command_exists "btm" 
             valid_command=$?
+        elif [[ "$pkg" == "lm_sensors" ]]; then
+            command_exists "sensors"
+            valid_command=$?
+        elif [[ "$pkg" == "smartmontools" ]]; then
+            command_exists "smartctl"
+            valid_command=$?
         else
             local valid_command
             command_exists "$pkg"
             valid_command=$?
         fi
 
-        if [[ $valid_command -eq 0 ]]; then
-            echo "$pkg already installed. Checking for config files"
+        if [ $valid_command -eq 0 ]; then
+            echo -e "${green}$pkg already installed. Checking for config files...${color_end}"
             handle_backups "$pkg"
         else
-            echo "Installing $pkg..."
-            if [[ "$pkg" == "ddgr" ]]; then
-                echo "No emerge package found for ddgr. Building from source..."
-                ddgr_build
-            elif [[ "$pkg" == "tealdeer" ]]; then
-                echo "No emerge package found for tealdeer. Building using cargo..."
-                local cargo_exists=command_exists "cargo"
-                if [[ $cargo_exists ]]; then
-                    cargo install tealdeer
-                else
-                    echo "Cargo not available. Emerging latest rust version..."
-                    sudo emerge --ask --noreplace "dev-lang/rust"
-                    cargo install tealdeer
-                fi
-            elif [[ "$pkg" == "wikiman" ]]; then
-                echo "No emerge package found for wikiman. Building from source..."
-                wikiman_build
+            if [[ "$pkg" == "ddgr" || "$pkg" == "wikiman" || "$pkg" || "tealdeer" ]]; then
+                handle_edge "$pkg"
             else
+                echo -e "${cyan}Installing $pkg...$color_end"
                 sudo emerge --ask --noreplace "$pkg_name"
                 if [[ ! -z "$dot_file" && -e "$dot_file" ]]; then
+                    echo -e "\n"
                     echo "Copying config file $dot_file to $conf_path"
-                    cp "$dot_file" "$conf_path"
-                    if [ $? -eq 1 ]; then
+                    if ! cp "$dot_file" "$conf_path"; then
+                        echo -e "Creating directory for config file in $conf_path"
                         mkdir -p "$conf_path"
                         cp "$dot_file" "$conf_path"
                     fi

@@ -12,18 +12,22 @@ git_config() {
 }
 
 if command_exists git; then
-    echo "Git already installed; skipping setup"
-    exit 1
+    gum_confirm "Git already installed. Proceed with configuration?"
+    res=$?
+    if [ $res -eq 1 ]; then
+        exit 0
+    fi
 else
-    echo "Installing Git..."
+    echo -e "${cyan}Installing Git...${color_end}"
     sudo emerge --ask --noreplace dev-vcs/git
 fi
 
 SYSTEM_USER=$(whoami)
 
+# TODO: update to gum input
 read -p "Enter your Git username for user '$SYSTEM_USER': " user_name
 read -p "Enter your Git email for user '$SYSTEM_USER': " user_email
 
 git_config "$user_name" "$user_email"
 
-echo "Git configuration for user '$SYSTEM_USER' complete."
+echo -e "${gren}Git configuration for user '$SYSTEM_USER' complete.${color_end}"
