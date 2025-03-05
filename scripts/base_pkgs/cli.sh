@@ -127,9 +127,7 @@ ddgr_build() {
         sudo emerge --ask --noreplace "dev/lang-python"
     fi
 
-    # TODO: replace with gum input
     while true; do
-        # read -p "Where to clone ddgr? (default $HOME/src/ddgr): " clone_location
         local clone_location=$(input "Where to clone ddgr? (default $HOME/src/ddgr)" "path/to/repo")
         case $clone_location in
             *)
@@ -176,6 +174,7 @@ wikiman_build() {
         "parallel"
     )
 
+    # ------------- dependency management
     declare -A dep_name_map
     dep_name_map["man"]="sys-apps/man-db"
     dep_name_map["fzf"]="app-shells/fzf"
@@ -194,10 +193,10 @@ wikiman_build() {
         fi
     done
 
-    # TODO: replace with gum input
+
+    # ------------- clone repo
     echo -e "${cyan}Cloning wikiman repo...${color_end}"
     while true; do
-        # read -p "Where to clone wikiman? (default $HOME/src/wikiman): " clone_location
         local clone_location=$(input "Where to clone wikiman? (default $HOME/src/wikiman)" "path/to/repo")
         case $clone_location in
             *)
@@ -221,7 +220,19 @@ wikiman_build() {
     cd "$clone_location"
     spinner "Installing wikiman" sudo make all && sudo make install
 
-    # TODO: Create sources install option
+    # -------------- install additional sources
+    sources_cb() {
+        local source="$1"
+        spinner "Installing $source source..." make "source-${source}"
+    }
+
+    cd "$clone_location"
+    local sources=("gentoo" "arch" "fbsd" "tldr")
+    local prompt="Select which sources to install for wikiman"
+    choose_multi "$prompt" sources_cb "${sources[@]}"
+    spinner "Finalizing sources..." sudo make source-install
+
+    unset -f sources_cb
 }
 
 # -------------- handle how to install tealdeer

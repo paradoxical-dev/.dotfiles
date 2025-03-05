@@ -132,6 +132,24 @@ choose_one() {
 }
 
 # @param {string} header prompt
+# @param {function | command} callback for selections
+# @param {list} list of choices
+choose_multi() {
+    local header="$1"
+    local cb="$2"
+    shift 2
+    local choices=("$@")
+
+    local selections=$($gum choose --cursor.foreground "#0fe" \
+    --selected.foreground "#0fe" --header.foreground "#f0e" \
+    --header="$header" --no-limit "${choices[@]}")
+
+    for selected in $selections; do
+        "$cb" "$selected"
+    done
+}
+
+# @param {string} header prompt
 gum_confirm() {
     local header="$1"
     
@@ -170,6 +188,7 @@ input() {
 export -f command_exists
 export -f unmask_package
 export -f choose_one
+export -f choose_multi
 export -f gum_confirm
 export -f spinner
 export -f input
