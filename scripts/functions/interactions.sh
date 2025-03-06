@@ -6,6 +6,8 @@
 #      functions will be sourced and used throughout        #
 #===========================================================#
 
+# Prompt the user to unmask package with given keyword(s)
+# ---
 # @param {string} package name
 # @param {list | string} keywords
 # @param {string} emerge package name 
@@ -19,6 +21,8 @@ unmask_package() {
     selected.background "#0fe")
 }
 
+# allow single selection of given options
+# ---
 # @param {string} header prompt
 # @param {function | command} callback for selection
 # @param {list} list of choices
@@ -35,6 +39,8 @@ choose_one() {
     "$cb"  "$selection"
 }
 
+# allow multiple selections of given options
+# ---
 # @param {string} header prompt
 # @param {function | command} callback for selections
 # @param {list} list of choices
@@ -53,6 +59,8 @@ choose_multi() {
     done
 }
 
+# prompt the user for confirmation of a given option
+# ---
 # @param {string} header prompt
 gum_confirm() {
     local header="$1"
@@ -62,6 +70,8 @@ gum_confirm() {
     --prompt.foreground "#0fe"
 }
 
+# spinner for commands which require bg work
+# ---
 # @param {string} spinner prompt
 # @param {command} command to wait on
 spinner() {
@@ -74,6 +84,8 @@ spinner() {
     -- "$@"
 }
 
+# pretty formatted messages
+# ---
 # @param {string | list} the message to be displayed
 inform_msg() {
     $gum format --border-foregound "#0fe" --border "rounded" \
@@ -81,6 +93,8 @@ inform_msg() {
     "$@"
 }
 
+# returns users typed input
+# ---
 # @param {string} prompt for the user
 # @param {string} guide text for the user
 input() {

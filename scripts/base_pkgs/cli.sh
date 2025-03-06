@@ -64,52 +64,6 @@ pkg_conf_map["fastfetch"]="$HOME/.dotfiles/base_configs/cli/fastfetch/$THEME.jso
 #       FUNCTION DECLARATION        #
 #====================================
 
-# -------------- what to do if a package is already installed
-# TODO: Make more modular and move to common functions
-handle_backups(){
-    local conf_path="${conf_path_map[$1]}"
-    local dot_file="${pkg_conf_map[$1]}"
-
-    if [[ ! -z "$conf_path" ]]; then
-        if [[ -e "$conf_path" ]]; then
-
-            cb() {
-                local selection="$1"
-                case "$selection" in
-                    "Move config to .bak")
-                        mv "$conf_path" "$conf_path.bak"; 
-                        echo -e "$green Backup cpmplete"
-                        echo "Copying config file $dot_file to $conf_path"
-                        cp "$dot_file" "$conf_path"
-                        ;;
-                    "Overwrite config")
-                        echo -e "${orange}Overwriting config file at $conf_path with $dot_file...${color_end}"
-                        cp "$dot_file" "$conf_path"
-                        ;;
-                    "Skip")
-                        echo "Skipping configuration of $1"
-                        ;;
-                esac
-            }
-            local choices=("Move config to .bak" "Overwrite config" "Skip")
-            local prompt="Config file found for $1. Next steps?"
-            choose_one "$prompt" cb "${choices[@]}"
-
-            unset -f cb
-
-        elif [[ ! -z "$dot_file" && -e $dot_file ]]; then
-            echo "Copying config file $dot_file to $conf_path..."
-            if ! cp "$dot_file" "$conf_path"; then
-                echo -e "${orange}No directory $conf_path. Creating directory...${color_end}"
-                mkdir -p "$conf_path"
-                cp "$dot_file" "$conf_path"
-            fi
-        fi
-    else
-        echo "No config file required for $1"
-    fi
-}
-
 # -------------- build ddgr from source
 ddgr_build() {
     gum_confirm "No ebuild found for ddgr. Build from source?"
@@ -280,7 +234,7 @@ handle_edge() {
             ddgr_build
         fi
     elif [[ "$case" == "tealdeer" ]]; then
-        if [[ -e "$HOME/.cargo/bin/tldr" || $(pkg_exists "tldr") ]]; then
+        if [[ -e "$HOME/.cargo/bin/tldr" || $(pkg_exists "tealdeer") ]]; then
             echo -e "${green}tealdeer already installed${color_end}"
         else
             echo -e "${cyan}Installing tealdeer${color_end}"
@@ -304,43 +258,33 @@ main() {
     for pkg in "${pkg_list[@]}"; do
         echo -e "\n"
 
+        # define the packages mapped values
         local pkg_name="${pkg_name_map[$pkg]}"
         local dot_file="${pkg_conf_map[$pkg]}"
         local conf_path="${conf_path_map[$pkg]}"
 
-        # if [[ "$pkg" == "bottom" ]]; then
-        #     local valid_command
-        #     pkg_exists "btm" 
-        #     valid_command=$?
-        # elif [[ "$pkg" == "lm_sensors" ]]; then
-        #     pkg_exists "sensors"
-        #     valid_command=$?
-        # elif [[ "$pkg" == "smartmontools" ]]; then
-        #     pkg_exists "smartctl"
-        #     valid_command=$?
-        # else
-            local exists
-            pkg_exists "$pkg"
-            exists=$?
-        # fi
+        # define whether the package exists
+        local exists
+        pkg_exists "$pkg"
+        exists=$?
 
         if [ $exists -eq 0 ]; then
+            # handle potential backups
             echo -e "${green}$pkg already installed. Checking for config files...${color_end}"
-            handle_backups "$pkg"
+            handle_backups "$pkg" "$conf_path" "$dot_file"
         else
+            # handle edge cases
             if [[ "$pkg" == "ddgr" || "$pkg" == "wikiman" || "$pkg" || "tealdeer" ]]; then
                 handle_edge "$pkg"
             else
+                # install otherwise
                 echo -e "${cyan}Installing $pkg...$color_end"
                 sudo emerge --ask --noreplace "$pkg_name"
+                # copy config if available
                 if [[ ! -z "$dot_file" && -e "$dot_file" ]]; then
                     echo -e "\n"
                     echo "Copying config file $dot_file to $conf_path"
-                    if ! cp "$dot_file" "$conf_path"; then
-                        echo -e "Creating directory for config file in $conf_path"
-                        mkdir -p "$conf_path"
-                        cp "$dot_file" "$conf_path"
-                    fi
+                    dynamic_copy "$dot_file" "$conf_path"
                 fi
             fi
         fi
