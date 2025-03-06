@@ -11,7 +11,7 @@ git_config() {
     git config --global color.ui auto
 }
 
-if command_exists git; then
+if pkg_exists git; then
     gum_confirm "Git already installed. Proceed with configuration?"
     res=$?
     if [ $res -eq 1 ]; then

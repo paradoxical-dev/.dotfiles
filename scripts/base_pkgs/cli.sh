@@ -120,7 +120,7 @@ ddgr_build() {
     fi
 
     local repo_url="https://github.com/jarun/ddgr"
-    local python_exists=command_exists "python"
+    local python_exists=pkg_exists "python"
 
     if [[ ! $python_exists ]]; then
         echo "No python version detected. Emerging python..."
@@ -251,7 +251,7 @@ handle_tealdeer() {
                 sudo emerge --ask --noreplace "$tealdeer_pkg"
                 ;;
             "Build with cargo")
-                if command_exists "cargo"; then
+                if pkg_exists "cargo"; then
                     echo -e "${cyan}Installing tealdeer..."
                     cargo install tealdeer
                 else
@@ -274,13 +274,13 @@ handle_tealdeer() {
 handle_edge() {
     local case="$1"
     if [[ "$case" == "ddgr" ]]; then
-        if command_exists "ddgr"; then
+        if pkg_exists "ddgr"; then
             echp -e "${green}ddgr already installed"
         else
             ddgr_build
         fi
     elif [[ "$case" == "tealdeer" ]]; then
-        if [[ -e "$HOME/.cargo/bin/tldr" || $(command_exists "tldr") ]]; then
+        if [[ -e "$HOME/.cargo/bin/tldr" || $(pkg_exists "tldr") ]]; then
             echo -e "${green}tealdeer already installed${color_end}"
         else
             echo -e "${cyan}Installing tealdeer${color_end}"
@@ -288,7 +288,7 @@ handle_edge() {
             handle_tealdeer "${methods[@]}"
         fi
     elif [[ "$case" == "wikiman" ]]; then
-        if  command_exists "wikiman"; then
+        if  pkg_exists "wikiman"; then
             echo -e "${green}wikiman already installed${color_end}"
         else
             wikiman_build
@@ -308,23 +308,23 @@ main() {
         local dot_file="${pkg_conf_map[$pkg]}"
         local conf_path="${conf_path_map[$pkg]}"
 
-        if [[ "$pkg" == "bottom" ]]; then
-            local valid_command
-            command_exists "btm" 
-            valid_command=$?
-        elif [[ "$pkg" == "lm_sensors" ]]; then
-            command_exists "sensors"
-            valid_command=$?
-        elif [[ "$pkg" == "smartmontools" ]]; then
-            command_exists "smartctl"
-            valid_command=$?
-        else
-            local valid_command
-            command_exists "$pkg"
-            valid_command=$?
-        fi
+        # if [[ "$pkg" == "bottom" ]]; then
+        #     local valid_command
+        #     pkg_exists "btm" 
+        #     valid_command=$?
+        # elif [[ "$pkg" == "lm_sensors" ]]; then
+        #     pkg_exists "sensors"
+        #     valid_command=$?
+        # elif [[ "$pkg" == "smartmontools" ]]; then
+        #     pkg_exists "smartctl"
+        #     valid_command=$?
+        # else
+            local exists
+            pkg_exists "$pkg"
+            exists=$?
+        # fi
 
-        if [ $valid_command -eq 0 ]; then
+        if [ $exists -eq 0 ]; then
             echo -e "${green}$pkg already installed. Checking for config files...${color_end}"
             handle_backups "$pkg"
         else

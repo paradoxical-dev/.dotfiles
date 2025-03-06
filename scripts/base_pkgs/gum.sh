@@ -9,7 +9,7 @@ fi
 echo "No ebuild for gum found in portage or GURU repos."
 echo -e "${cyan}Installing gum with `go install`...${color_end}"
 
-if ! command_exists "go"; then
+if ! pkg_exists "go"; then
     echo -e "${teal}No Go version found. Emerging latest version...${color_end}"
     sudo emerge --ask --noreplace "dev-lang/go"
 fi

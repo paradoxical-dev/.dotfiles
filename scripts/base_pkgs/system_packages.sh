@@ -19,7 +19,7 @@ pkg_name_map["upower"]="sys-power/upower"
 neovim_install() {
     local nvim_conf_path="$HOME/.dotfiles/base_configs/nvim"
     local valid_command
-    command_exists "nvim"
+    pkg_exists "nvim"
     valid_command=$?
 
     if [ $valid_command -eq 0 ]; then
@@ -58,7 +58,7 @@ neovim_install() {
 tmux_install() {
     local tmux_conf_path="$HOME/.dotfiles/base_configs/tmux/$THEME.conf"
     local valid_command
-    command_exists "tmux"
+    pkg_exists "tmux"
     valid_command=$?
 
     if [[ $valid_command -eq 0 ]]; then
@@ -104,7 +104,7 @@ for pkg in "${pkg_list[@]}"; do
         tmux_install
     else
         pkg_name="${pkg_name_map[$pkg]}"
-        if command_exists "$pkg" || ls /var/db/pkg/*/"$pkg"-* &> /dev/null; then
+        if pkg_exists "$pkg" || ls /var/db/pkg/*/"$pkg"-* &> /dev/null; then
             echo -e "${green}$pkg already installed"
         else
             echo -e "${cyan}Installing $pkg...${color_end}"

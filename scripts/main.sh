@@ -1,8 +1,8 @@
 #!/bin/bash
 
-#===============================#
-#      OPTS INITIALIZATION      #
-#===============================#
+#==============================#
+#            SETUP             #
+#==============================#
 
 PROFILE=""
 PROFILE_DIR=""
@@ -53,7 +53,7 @@ if [ -z "$CONFIG_DIR" ]; then
     CONFIG_DIR="$HOME/.config"
 fi
 
-# --------------- color definitions
+# ------------ color definitions
 red="\e[1;31m"
 green="\e[1;32m"
 yellow="\e[1;33m"
@@ -63,7 +63,7 @@ cyan="\e[1;36m"
 orange="\e[1;38;5;214m"
 end="\e[1;0m"
 
-# --------------- export script-wide vars
+# ------------ export script-wide vars
 # ------ opts
 export PROFILE=$PROFILE
 export PROFILE_DIR=$PROFILE_DIR
@@ -84,19 +84,10 @@ export color_end=$end
 export gum="$HOME/go/bin/gum"
 
 
-#================================#
-#        COMMON FUNCTIONS        #
-#================================#
-
-# TODO: Move function declaration to external script(s)
-# This will be called by the main script to export them
-
-# @param {string} command
-command_exists() {
-    command -v "$1" &> /dev/null
-}
-
-export -f command_exists
+# --------------- common functions
+for script in "$HOME/.dotfiles/scripts/functions/"*; do
+    source "$script"
+done
 
 #===============================#
 #          MAIN SCRIPT          #
@@ -124,6 +115,7 @@ if [ $sync_db -eq 0 ]; then
 fi
 echo -e "\n"
 
+# --------------- initialize script dependencies
 echo "git and gum packages are required for the remainder of this script"
 echo -e "${cyan}Installing now...${color_end}"
 echo -e "\n"
