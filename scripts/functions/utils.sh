@@ -69,6 +69,7 @@ handle_backups(){
             local choices=("Move config to .bak" "Overwrite config" "Skip")
             local prompt="Config file found for $pkg. Next steps?"
             choose_one "$prompt" cb "${choices[@]}"
+            echo -e "\n"
 
             # remove `cb` func from global scope
             unset -f cb
@@ -77,9 +78,11 @@ handle_backups(){
             # continue config if no user config present and stored config exists
             echo "Copying config file $dot_file to $conf_path..."
             dynamic_copy "$dot_file" "$conf_path"
+            echo -e "\n"
         fi
     else
         echo "No config file required for $pkg"
+        echo -e "\n"
     fi
 }
 

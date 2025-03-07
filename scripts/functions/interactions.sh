@@ -16,9 +16,17 @@ unmask_package() {
     local keywords=$2
     local pkg_repo=$3
 
-    echo -e "$orangeThe package $pkg is currently masked by keyword(s) $keywords $color_end"
-    local unmask=$($gum confirm "Unmask package $1?" --prompt.foreground "#0fe" \
-    selected.background "#0fe")
+    echo -e "$orange}The package $pkg is currently masked by keyword(s) $keywords${color_end}"
+
+    gum_confirm "Unmask package $1?" 
+    local res=$?
+
+    if [ $res -eq 0 ]; then
+        echo "$pkg_repo $keywords" | sudo tee -a "/etc/portage/package.accept_keywords/$pkg" > /dev/null
+        sudo emerge --ask --noreplace "$pkg_repo"
+    else
+        echo "Skipping installation of $pkg"
+    fi
 }
 
 # allow single selection of given options
@@ -84,15 +92,6 @@ spinner() {
     -- "$@"
 }
 
-# pretty formatted messages
-# ---
-# @param {string | list} the message to be displayed
-inform_msg() {
-    $gum format --border-foregound "#0fe" --border "rounded" \
-    --align "center" --width 50 --margin "1 2" --padding "2 4" \
-    "$@"
-}
-
 # returns users typed input
 # ---
 # @param {string} prompt for the user
@@ -106,9 +105,36 @@ input() {
     --cursor.foreground "#fff"
 }
 
+# pretty formatted messages
+# ---
+# @param {string | list} the message to be displayed
+inform_msg() {
+    $gum style --border "rounded" --border-foreground "#0fe" \
+    --align "center" --width 50 --margin "1 2" --padding "2 4" \
+    "$@"
+}
+
+# a simple greeter for the script
+greet(){
+    $gum style --align "center" \
+    "Hello and welcome to..." \
+     '
+         ____               _           __     ___                         
+        / __ \_________    (_)__  _____/ /_   /   |  _________ ___  _______
+       / /_/ / ___/ __ \  / / _ \/ ___/ __/  / /| | / ___/ __ `/ / / / ___/
+      / ____/ /  / /_/ / / /  __/ /__/ /_   / ___ |/ /  / /_/ / /_/ (__  ) 
+     /_/   /_/   \____/_/ /\___/\___/\__/  /_/  |_/_/   \__, /\__,_/____/  
+                     /___/                             /____/              
+                                                 by paradoxical-dev
+     '
+    sleep 0.5
+}
+
 export -f unmask_package
 export -f choose_one
 export -f choose_multi
 export -f gum_confirm
 export -f spinner
 export -f input
+export -f inform_msg
+export -f greet

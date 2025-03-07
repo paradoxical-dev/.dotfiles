@@ -1,5 +1,14 @@
 #!/bin/bash
 
+echo '
+   _______ __ 
+  / ____(_) /_
+ / / __/ / __/
+/ /_/ / / /_  
+\____/_/\__/  
+              
+'
+
 git_config() {
     local user_name="$1"
     local user_email="$2"
@@ -13,20 +22,30 @@ git_config() {
 
 if pkg_exists git; then
     gum_confirm "Git already installed. Proceed with configuration?"
-    res=$?
-    if [ $res -eq 1 ]; then
-        exit 0
-    fi
+    do_conf=$?
 else
+    do_conf=0
     echo -e "${cyan}Installing Git...${color_end}"
     sudo emerge --ask --noreplace dev-vcs/git
 fi
 
 SYSTEM_USER=$(whoami)
 
-read -p "Enter your Git username for user '$SYSTEM_USER': " user_name
-read -p "Enter your Git email for user '$SYSTEM_USER': " user_email
+if [ $do_conf -eq 0 ]; then
+    username=$(input "Enter your Git username for user '$SYSTEM_USER': " "user123")
+    email=$(input "Enter your Git email for user '$SYSTEM_USER': " "example@email.com")
 
-git_config "$user_name" "$user_email"
+    git_config "$username" "$email"
+    echo -e "${gren}Git configuration for user '$SYSTEM_USER' complete.${color_end}"
+fi
 
-echo -e "${gren}Git configuration for user '$SYSTEM_USER' complete.${color_end}"
+echo -e "\n"
+
+if ! pkg_exists "lazygit"; then
+    echo -e "${cyan}Installing Lazygit...${color_end}"
+    unmask_package "lazygit" "~amd64" "dev-vcs/lazygit"
+else
+    echo -e "${green}Lazygit already installed${color_end}"
+fi
+
+echo -e "\n"

@@ -93,9 +93,22 @@ done
 #          MAIN SCRIPT          #
 #===============================#
 
-echo -e "${cyan}Wealcome to the install script!${color_end}"
+# --------------- handle gum dependency
+if [[ ! -e $HOME/go/bin/gum ]]; then
+    echo -e "${yellow}gum is required to run this script${color_end}"
+    echo "Installing now..."
+    echo -e "\n"
+    if ! pkg_exists "go"; then
+        echo "${teal}No go version found. Emerging latest version...${color_end}"
+        sudo emerge --ask --noreplace "dev-lang/go"
+    fi
+    go install "github.com/charmbracelet/gum@latest"
+    echo -e "\n"
+fi
+
 echo -e "\n"
-echo "Before installation, the GURU repository will need to be added..."
+greet
+inform_msg "Before installation, the GURU repository will need to be added..."
 echo -e "\n"
 
 # --------------- install/update GURU repo
@@ -115,12 +128,9 @@ if [ $sync_db -eq 0 ]; then
 fi
 echo -e "\n"
 
-# --------------- initialize script dependencies
-echo "git and gum packages are required for the remainder of this script"
-echo -e "${cyan}Installing now...${color_end}"
-echo -e "\n"
+# --------------- git config
+echo "First things first, lets make sure Git is configured"
 $HOME/.dotfiles/scripts/base_pkgs/git.sh
-$HOME/.dotfiles/scripts/base_pkgs/gum.sh
 
 # --------------- Base system packages before moving to profile specific
 echo "Installing base system packages..."
@@ -130,3 +140,4 @@ echo "Installing CLI tools..."
 $HOME/.dotfiles/scripts/base_pkgs/cli.sh
 
 
+# TODO: continue w shell installation/cofniguration
