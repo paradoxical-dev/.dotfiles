@@ -19,7 +19,7 @@ pkg_list=(
     "fzf"
     "jq"
     "lesspipe"
-    "lm_sensors"
+    "lm-sensors"
     "lshw"
     "smartmontools"
     "tealdeer"
@@ -272,7 +272,6 @@ main() {
             # handle potential backups
             echo -e "${green}$pkg already installed. Checking for config files...${color_end}"
             handle_backups "$pkg" "$conf_path" "$dot_file"
-            echo -e "\n"
         else
             # handle edge cases
             if [[ "$pkg" == "ddgr" || "$pkg" == "wikiman" || "$pkg" || "tealdeer" ]]; then
