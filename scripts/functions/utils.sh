@@ -40,7 +40,16 @@ handle_backups(){
     local dot_file="$3"
 
     if [[ ! -z "$conf_path" ]]; then
-        if [[ -e "$conf_path" ]]; then
+
+        # handle multiple paths
+        local config_exists=1
+        for path in $conf_path; do
+            if [[ -e "$path" ]]; then
+                config_exists=0
+            fi
+        done
+        
+        if [ $config_exists -eq 0 ]; then
 
             # callback to handle the users backup preference
             cb() {

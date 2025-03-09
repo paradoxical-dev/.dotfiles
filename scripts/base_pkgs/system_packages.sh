@@ -19,7 +19,7 @@ pkg_name_map["upower"]="sys-power/upower"
 # --------------- map packages to potential user configs
 declare -A conf_path_map
 conf_path_map["neovim"]="$CONFIG_DIR/nvim"
-conf_path_map["tmux"]="$HOME/.tmux.conf"
+conf_path_map["tmux"]="$HOME/.tmux.conf $CONFIG_DIR/tmux/tmux.conf"
 
 # --------------- map packages to stored configs
 declare -A pkg_conf_map
