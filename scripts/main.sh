@@ -138,6 +138,3 @@ $HOME/.dotfiles/scripts/base_pkgs/system_packages.sh
 
 echo "Installing CLI tools..."
 $HOME/.dotfiles/scripts/base_pkgs/cli.sh
-
-
-# TODO: continue w shell installation/cofniguration
