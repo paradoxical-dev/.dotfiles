@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# TODO: replace upower with acpi
 pkg_list=(
     "neovim" 
     "parallel" 

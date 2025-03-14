@@ -98,7 +98,6 @@ alias ai="aider --model ollama_chat/qwen2.5-coder:14b --weak-model ollama_chat/l
 alias ls="eza -a --icons"
 alias ll="eza -al --icons"
 alias lt="eza -a --tree --level=1 --icons"
-alias shutdown="systemctl poweroff"
 
 #=== GIT ===#
 alias gs="git status"

@@ -7,6 +7,7 @@
 PROFILE=""
 PROFILE_DIR=""
 THEME=""
+LAPTOP=1
 
 # --------------- grab the passed options
 while [[ $# -gt 0 ]]; do
@@ -29,6 +30,8 @@ while [[ $# -gt 0 ]]; do
 	    echo "  "
 	    exit 0
 	;;
+    --laptop)
+        LAPTOP=0
 	*)
 	    echo "Unknown option: $1"
 	    exit 1
@@ -138,3 +141,25 @@ $HOME/.dotfiles/scripts/base_pkgs/system_packages.sh
 
 echo "Installing CLI tools..."
 $HOME/.dotfiles/scripts/base_pkgs/cli.sh
+
+echo "Adding services..."
+$HOME/.dotfiles/scripts/base_pkgs/services.sh
+
+# --------------- shell select / theme integration
+echo "Creating file to store theme value."
+while true; do
+    theme_file=$(input "Where to store file? (default $HOME/.system-theme) INCLUDING FILE NAME" "path/to/system-theme")
+    case "$theme_file" in
+        *) 
+            if [[ -z "$theme_file" ]]; then
+                theme_file="$HOME/.system-theme"
+                break
+            elif [[ -e "$clone_location" ]]; then
+                break
+            else
+                echo -e "${red}$clone_location is not a valid path. Please enter a valid path to clone the repo.${color_end}"
+            fi
+            ;;
+    esac
+done
+echo "$THEME" >> "$theme_file"

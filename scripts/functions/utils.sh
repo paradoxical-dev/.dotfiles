@@ -92,6 +92,14 @@ handle_backups(){
     fi
 }
 
+add_service() {
+    local name="$1"
+    echo -e "${cyan}Starting service $name and adding to default${color_end}"
+    sudo rc-service "$name" start
+    sudo rc-update add "$name" default
+}
+
 export -f pkg_exists
 export -f dynamic_copy
 export -f handle_backups
+export -f add_service
