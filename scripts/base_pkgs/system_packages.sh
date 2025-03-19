@@ -1,21 +1,20 @@
 #!/bin/bash
 
-# TODO: replace upower with acpi
 pkg_list=(
+    "acpi"
     "neovim" 
     "parallel" 
     "ripgrep" 
     "tmux" 
     "unzip" 
-    "upower"
 )
 
 # --------------- map packages to repo names
 declare -A pkg_name_map
+pkg_name_map["acpi"]="sys-power/acpi"
 pkg_name_map["parallel"]="sys-process/parallel"
 pkg_name_map["ripgrep"]="sys-apps/ripgrep"
 pkg_name_map["unzip"]="app-arch/unzip"
-pkg_name_map["upower"]="sys-power/upower"
 
 # --------------- map packages to potential user configs
 declare -A conf_path_map

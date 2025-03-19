@@ -11,17 +11,17 @@
 # including: history, keybinds, startup commands, etc.
 
 #=== DIR CHECKS ===#
-if [[ ! -d "${XDG_CONFIG_HOME:-$HOME/.config}/zsh" ]]; then
+if [[ ! -d "${$XDG_CONFIG_HOME:-$HOME/.config}/zsh" ]]; then
     mkdir -p $(dirname "${$XDG_CONFIG_HOME:-$HOME/.config}/zsh")
-elif [[ ! -d "${XDG_CONFIG_HOME:-$HOME/.config}/zsh/oh-my-zsh" ]]; then
+elif [[ ! -d "${$XDG_CONFIG_HOME:-$HOME/.config}/zsh/oh-my-zsh" ]]; then
     echo -e "\e[1;33m!!! Oh My Zsh not installed. Installing now...\e[1;0m"
-    ZSH="${XDG_CONFIG_HOME:-$HOME/.config}/zsh/oh-my-zsh"
-    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+    ZSH="${$XDG_CONFIG_HOME:-$HOME/.config}/zsh/oh-my-zsh"
+    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/master/tools/install.sh)"
 fi
 
 #=== HISTORY ===#
 HISTSIZE=10000
-HISTFILE="${XDG_CONFIG_HOME:-$HOME/.config}/zsh/zsh_history"
+HISTFILE="${$XDG_CONFIG_HOME:-$HOME/.config}/zsh/zsh_history"
 SAVEHIST=10000
 HISTDUP=erase
 setopt appendhistory
@@ -38,8 +38,7 @@ bindkey '^p' history-search-backward
 bindkey '^n' history-search-forward
 
 #=== OMZ ===#
-export ZSH="${XDG_CONFIG_HOME:-$HOME/.config}/zsh/oh-my-zsh"
-export ZSH_CUSTOM="${ZSH_CUSTOM:-$ZSH/custom}"
+export ZSH="${$XDG_CONFIG_HOME:-$HOME/.config}/zsh/oh-my-zsh"
 
 for entry in \
     "fzf-tab https://github.com/Aloxaf/fzf-tab" \
@@ -48,28 +47,28 @@ for entry in \
     "zsh-autosuggestions https://github.com/zsh-users/zsh-autosuggestions" \
     "zsh-completions https://github.com/zsh-users/zsh-completions"; do
 
-    read -r plugin url <<< "$entry"
+    set -- $entry
+    plugin="$1"
+    url="$2"
 
-    [[ -d "$ZSH_CUSTOM/plugins/$plugin" ]] || git clone "$url" "$ZSH_CUSTOM/plugins/$plugin"
+    [[ -d "$ZSH_CUSTOM/$plugin" ]] || git clone "$url" "$ZSH_CUSTOM/$plugin"
 done
 
 plugins=(
-    sudo
-    copybuffer
-    copyfile
-    dirhistory
-    fzf-tab
-    zsh-vi-mode
-    zsh-autosuggestions
-    zsh-syntax-highlighting
+    "sudo"
+    "copybuffer"
+    "copyfile"
+    "dirhistory"
+    "fzf-tab"
+    "zsh-vi-mode"
+    "zsh-autosuggestions"
+    "zsh-syntax-highlighting"
 )
 fpath+="$ZSH_CUSTOM/plugins/zsh-completions/src"
 
-source $ZSH/oh-my-zsh.sh
-
 #=== MISC ===#
 # case insensitive completion
-zstyle ":completion:*" matcher-list "m:{a-z}={A-Za-z}"
+zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'
 
 
 #========================================#
@@ -99,7 +98,6 @@ alias ai="aider --model ollama_chat/qwen2.5-coder:14b --weak-model ollama_chat/l
 alias ls="eza -a --icons"
 alias ll="eza -al --icons"
 alias lt="eza -a --tree --level=1 --icons"
-alias tldr="$HOME/.cargo/bin/tldr" # Only if manually built
 
 #=== GIT ===#
 alias gs="git status"
@@ -126,7 +124,7 @@ alias gg="lazygit"
 # INFO: Extra environment variables to be used within the shell
 
 #=== THEME CONTROL ===#
-export SYSTEM_THEME=$(cat "$HOME/.system-theme")
+export SYSTEM_THEME=$(cat "$HOME/,system-theme")
                                       
 
 #============================#
@@ -143,9 +141,9 @@ export SYSTEM_THEME=$(cat "$HOME/.system-theme")
 
 #=== BASE ===#
 eval "$(fzf --zsh)"
-zstyle ":completion:*" menu no
-zstyle ":fzf-tab:complete:cd:*" fzf-preview "eza -1 --color=always $realpath"
-zstyle ":fzf-tab:*" use-fzf-default-opts yes
+zstyle ':completion:*' menu no
+zstyle ':fzf-tab:complete:cd:*' fzf-preview 'eza -1 --color=always $realpath'
+zstyle ':fzf-tab:*' use-fzf-default-opts yes
 
 # dynamic theme switching
 update_fzf_theme() {
@@ -155,7 +153,7 @@ update_fzf_theme() {
             --color=fg+:#f8f8fb,bg+:#45475b
             --color=hl:#b4befe,hl+:#94e2d5,info:#f5e0dc,marker:#f38ba8
             --color=prompt:#b4befe,spinner:#94e2d5,pointer:#b4befe,header:#f5c2e7
-            --color=border:#404040,label:#aeaeae,query:#f8f8fb
+            --color=border:#404040,label:#aeaeae,query:#f8f8fb,gutter:-1
             --border="rounded" --preview-window="border-rounded"
             --prompt=" " --marker=""
             --separator="─" --scrollbar="│" --info="right"'
@@ -163,32 +161,31 @@ update_fzf_theme() {
         *)
             export FZF_DEFAULT_OPTS='
             --border="rounded" --preview-window="border-rounded"
-            --prompt=" " --marker=""
+            --prompt=" " --marker="" --gutter:-1
             --separator="─" --scrollbar="│" --info="right"'
             ;;
 
     esac
 }
-SYSTEM_THEME=$(cat "$HOME/.system-theme")
 update_fzf_theme
 
 #=== FZF PREVIEWS ===#
 # Service status
-zstyle ":fzf-tab:complete:rc-service-*:*" fzf-preview "rc-service $word status"
+zstyle ':fzf-tab:complete:-*:*' fzf-preview 'rc-service $word status'
 
 # File content
-zstyle ":fzf-tab:complete:*:*" fzf-preview "less $realpath"
-export LESSOPEN="|$HOME/.dotfiles/scripts/etc/lessfilter.sh %s"
-zstyle ":fzf-tab:complete:*:options" fzf-preview 
-zstyle ":fzf-tab:complete:*:argument-1" fzf-preview
+zstyle ':fzf-tab:complete:*:*' fzf-preview 'less $realpath'
+export LESSOPEN='|${config.home.homeDirectory}dots/scripts/lessfilter.sh %s'
+zstyle ':fzf-tab:complete:*:options' fzf-preview 
+zstyle ':fzf-tab:complete:*:argument-1' fzf-preview
 
 # Env vars
-zstyle ":fzf-tab:complete:(-command-|-parameter-|-brace-parameter-|export|unset|expand):*" \
-fzf-preview "echo ${(P)word}"
+zstyle ':fzf-tab:complete:(-command-|-parameter-|-brace-parameter-|export|unset|expand):*' \
+fzf-preview 'echo ''${(P)word}'
 
 # Dynamic man pages for commands
-zstyle ":fzf-tab:complete:-command-:*" fzf-preview \
-"(out=$(tldr --color always "$word") 2>/dev/null && echo $out) || (out=$(MANWIDTH=$FZF_PREVIEW_COLUMNS man "$word") 2>/dev/null && echo $out) || (out=$(which "$word") && echo $out) || echo "${(P)word}""
+zstyle ':fzf-tab:complete:-command-:*' fzf-preview \
+'(out=$(tldr --color always "$word") 2>/dev/null && echo $out) || (out=$(MANWIDTH=$FZF_PREVIEW_COLUMNS man "$word") 2>/dev/null && echo $out) || (out=$(which "$word") && echo $out) || echo "''${(P)word}"'
 
 
 #=================================================#

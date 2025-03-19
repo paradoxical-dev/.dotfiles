@@ -32,6 +32,8 @@ while [[ $# -gt 0 ]]; do
 	;;
     --laptop)
         LAPTOP=0
+        shift 1
+    ;;
 	*)
 	    echo "Unknown option: $1"
 	    exit 1
@@ -71,6 +73,7 @@ end="\e[1;0m"
 export PROFILE=$PROFILE
 export PROFILE_DIR=$PROFILE_DIR
 export THEME=$THEME
+export $LAPTOP=$LAPTOP
 export CONFIG_DIR=$CONFIG_DIR
 
 # ------ colors
@@ -145,7 +148,7 @@ $HOME/.dotfiles/scripts/base_pkgs/cli.sh
 echo "Adding services..."
 $HOME/.dotfiles/scripts/base_pkgs/services.sh
 
-# --------------- shell select / theme integration
+# --------------- theme file creation 
 echo "Creating file to store theme value."
 while true; do
     theme_file=$(input "Where to store file? (default $HOME/.system-theme) INCLUDING FILE NAME" "path/to/system-theme")
@@ -162,4 +165,10 @@ while true; do
             ;;
     esac
 done
-echo "$THEME" >> "$theme_file"
+echo "$THEME" > "$theme_file"
+
+# --------------- shell select
+$HOME/.dotfiles/scripts/base_pkgs/shells.sh
+
+# --------------- Profile specific
+# TODO: start porting over hypr conf, wayland support, etc.

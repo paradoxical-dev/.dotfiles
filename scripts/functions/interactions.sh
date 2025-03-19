@@ -114,6 +114,8 @@ inform_msg() {
     "$@"
 }
 
+# TODO: Change to "The Forge" (just makes more sense)
+
 # a simple greeter for the script
 greet(){
     $gum style --align "center" \
