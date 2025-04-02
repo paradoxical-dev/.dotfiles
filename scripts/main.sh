@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# WARN: DO NOT TOUCH
+# MERGING KERNEL CONFIGS AND TESTING!!!
+
 #==============================#
 #            SETUP             #
 #==============================#
