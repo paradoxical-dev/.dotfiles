@@ -139,13 +139,37 @@ edit_use() {
     shift 2
     local flags="$@"
 
-    local changed_flags=()
+    # mark flags to include
+    local added_flags=()
     cb() {
         local flag="$1"
-        changed_flags+=("$flag")
+        added_flags+=("$flag")
+        echo -e "Including flag $flag"
     }
-    choose_multi ""
+    choose_multi "Choose which flags to ADD at build time" cb "${flags[@]}"
     unset -f cb
+
+    echo -e "\n"
+
+    # mark flags for removal
+    local removed_flags=()
+    cb() {
+        local flag="$1"
+        removed_flags+=("$flag")
+    }
+    choose_multi "Choose which flags to REMOVE at build time" cb "${flags[@]}"
+    unset -f cb
+
+    # create master string to include in package.use file
+    local r=$(printf -- '-%s ' "${removed_flags[@]}")
+    local a=$(printf -- '%s ' "${added_flags[@]}")
+    # remove trailing whitespace
+    r=${r::-1}
+    a=${a::-1}
+
+    echo "$pkg_repo $r $a" | sudo tee -a "/etc/portage/package.use/${pkg}" > /dev/null
+    echo -e "\n"
+    echo -e "${green}Successfully added custom USE to $pkg${color_end}"
 }
 
 export -f pkg_exists

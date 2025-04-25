@@ -6,29 +6,6 @@
 #      functions will be sourced and used throughout        #
 #===========================================================#
 
-# Prompt the user to unmask package with given keyword(s)
-# ---
-# @param {string} package name
-# @param {list | string} keywords
-# @param {string} emerge package name 
-unmask_package() {
-    local pkg=$1
-    local keywords=$2
-    local pkg_repo=$3
-
-    echo -e "$orange}The package $pkg is currently masked by keyword(s) $keywords${color_end}"
-
-    gum_confirm "Unmask package $1?" 
-    local res=$?
-
-    if [ $res -eq 0 ]; then
-        echo "$pkg_repo $keywords" | sudo tee -a "/etc/portage/package.accept_keywords/$pkg" > /dev/null
-        sudo emerge --ask --noreplace "$pkg_repo"
-    else
-        echo "Skipping installation of $pkg"
-    fi
-}
-
 # allow single selection of given options
 # ---
 # @param {string} header prompt
