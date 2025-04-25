@@ -94,6 +94,9 @@ handle_backups(){
     fi
 }
 
+# Add service to open-rc default and start in current session
+# ---
+# @param (string) service name
 add_service() {
     local name="$1"
     echo -e "${cyan}Starting service $name and adding to default${color_end}"
@@ -101,7 +104,53 @@ add_service() {
     sudo rc-update add "$name" default
 }
 
+# Prompt the user to unmask package with given keyword(s)
+# ---
+# @param {string} package name
+# @param {list | string} keywords
+# @param {string} emerge package name 
+unmask_package() {
+    local pkg="$1"
+    local keywords="$2"
+    local pkg_repo="$3"
+
+    echo -e "$orange}The package $pkg is currently masked by keyword(s) $keywords${color_end}"
+
+    gum_confirm "Unmask package $1?" 
+    local res=$?
+
+    if [ $res -eq 0 ]; then
+        echo "$pkg_repo $keywords" | sudo tee -a "/etc/portage/package.accept_keywords/$pkg" > /dev/null
+        sudo emerge --ask --noreplace "$pkg_repo"
+    else
+        echo "Skipping installation of $pkg"
+    fi
+}
+
+
+# Edit per package USE when applicable
+# ---
+# @param (string) package name
+# @param (string) package repo name
+# @param (string | list) available flags
+edit_use() {
+    local pkg="$1"
+    local pkg_repo="$2"
+    shift 2
+    local flags="$@"
+
+    local changed_flags=()
+    cb() {
+        local flag="$1"
+        changed_flags+=("$flag")
+    }
+    choose_multi ""
+    unset -f cb
+}
+
 export -f pkg_exists
 export -f dynamic_copy
 export -f handle_backups
 export -f add_service
+export -f unmask_package
+export -f edit_use

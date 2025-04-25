@@ -35,3 +35,5 @@ pkg_name_map["xwayland"]="x11-base/xwayland"
 
 # -------------- map dotfiles to package names
 declare -A pkg_conf_map
+pkg_conf_map["hyprland"]="$HOME/.dotfiles/profiles/desktop/hypr/hypr_conf/"
+pkg_conf_map["hyprpaper"]="$HOME/.dotfiles/profiles/desktop/hypr/hypr_conf/hyprpaper.conf"
