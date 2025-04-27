@@ -139,6 +139,8 @@ edit_use() {
     shift 2
     local flags="$@"
 
+    # TODO: add method of displaying default package flags per system
+
     # mark flags to include
     local added_flags=()
     cb() {
