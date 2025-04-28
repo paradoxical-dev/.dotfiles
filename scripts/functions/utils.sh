@@ -139,7 +139,12 @@ edit_use() {
     shift 2
     local flags="$@"
 
-    # TODO: add method of displaying default package flags per system
+    # parse and display the current flags applied to the pacakge
+    local use=$(emerge -pv "$pkg_repo" | grep "$pkg_repo")
+    local default_flags=$(echo "$use" | sed -n 's/.*USE="\([^"]*\)".*/\1/p')
+    echo -e "${cyan}The following are the default flags $pkg will be installed with${color_end}"
+    echo -e "\n"
+    echo "$default_flags"
 
     # mark flags to include
     local added_flags=()
@@ -169,9 +174,18 @@ edit_use() {
     r=${r::-1}
     a=${a::-1}
 
-    echo "$pkg_repo $r $a" | sudo tee -a "/etc/portage/package.use/${pkg}" > /dev/null
-    echo -e "\n"
-    echo -e "${green}Successfully added custom USE to $pkg${color_end}"
+    gum_confirm "Confirm thr following modifications: $r $a"
+    local confirm=$?
+
+    if [ $confirm -eq 0 ]; then
+        echo -e "${yellow}Copying flag modifications to /etc/portage/package.use/$pkg${color_end}..."
+        echo "$pkg_repo $r $a" | sudo tee -a "/etc/portage/package.use/${pkg}" > /dev/null
+        echo -e "\n"
+        echo -e "${green}Successfully added custom USE to $pkg${color_end}"
+    else
+        echo -e "${yellow}Resetting selection...${color_end}"
+        edit_use
+    fi
 }
 
 export -f pkg_exists

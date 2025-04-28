@@ -1,11 +1,15 @@
 #!/bin/bash
 
-# WARN: DO NOT TOUCH
-# MERGING KERNEL CONFIGS AND TESTING!!!
+# TODO: Refactor and replace hardcoded paths with vars
 
 #==============================#
 #            SETUP             #
 #==============================#
+
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+REPO_DIR="$(dirname "$SCRIPT_DIR")"
+
+#======(OPTS)======#
 
 PROFILE=""
 PROFILE_DIR=""
@@ -50,8 +54,15 @@ if [[ -z "$PROFILE" ]]; then
     echo "To view all available profiles use --list-profiles"
     exit 1
 fi
-PROFILE_DIR="$HOME/profiles/$PROFILE"
+PROFILE_DIR="$REPO_DIR/profiles/$PROFILE"
+if [[ ! -d "$PROFILE_DIR" ]]; then
+    echo "$PROFILE_DIR"
+    echo "Profile $PROFILE does not exist. Please select an available profile."
+    echo "To view all available profiles use --list-profiles"
+    exit 1
+fi
 
+# TODO: Add themes list and check if theme is available
 if [[ -z "$THEME" ]]; then
     echo "No theme set. Using default 'echelon' configurations..."
 fi
@@ -60,6 +71,8 @@ CONFIG_DIR=$(echo $XDG_CONFIG_HOME)
 if [ -z "$CONFIG_DIR" ]; then
     CONFIG_DIR="$HOME/.config"
 fi
+
+#======(VARIABLES)======#
 
 # ------------ color definitions
 red="\e[1;31m"
@@ -74,10 +87,17 @@ end="\e[1;0m"
 # ------------ export script-wide vars
 # ------ opts
 export PROFILE=$PROFILE
-export PROFILE_DIR=$PROFILE_DIR
+export DEVICE_TYPE="${PROFILE%%/*}"
+export PROFILE_VARIANT="${PROFILE#*/}"
 export THEME=$THEME
 export LAPTOP=$LAPTOP
 export CONFIG_DIR=$CONFIG_DIR
+
+# ------ paths
+export SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+export REPO_DIR="$(dirname "$SCRIPT_DIR")"
+export PROFILE_DIR=$PROFILE_DIR
+export PROFILE_BASE_DIR="$REPO_DIR/profiles/$DEVICE_TYPE"
 
 # ------ colors
 export red=$red
@@ -92,7 +112,7 @@ export color_end=$end
 # ------ common commands
 export gum="$HOME/go/bin/gum"
 
-# --------------- common functions
+# ------ common functions
 for script in "$HOME/.dotfiles/scripts/functions/"*; do
     source "$script"
 done
@@ -100,6 +120,8 @@ done
 #===============================#
 #          MAIN SCRIPT          #
 #===============================#
+
+#======(DEPS)======#
 
 # --------------- handle gum dependency
 if [[ ! -e $HOME/go/bin/gum ]]; then
@@ -135,6 +157,8 @@ if [ $sync_db -eq 0 ]; then
     sudo emerge --sync
 fi
 echo -e "\n"
+
+#======(BASE)======#
 
 # --------------- git config
 echo "First things first, lets make sure Git is configured"
@@ -172,5 +196,8 @@ echo "$THEME" > "$theme_file"
 # --------------- shell select
 $HOME/.dotfiles/scripts/base_pkgs/shells.sh
 
-# --------------- Profile specific
-# TODO: start porting over hypr conf, wayland support, etc.
+#======(PROFILE SPECIFIC)======#
+
+echo "Lets begin installing the base packages for your $DEVICE_TYPE device..."
+echo -e "\n"
+$PROFILE_BASE_DIR/scripts/base.sh
