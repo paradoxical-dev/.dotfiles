@@ -25,8 +25,8 @@ conf_path_map["tmux"]="$HOME/.tmux.conf $CONFIG_DIR/tmux/tmux.conf"
 
 # --------------- map packages to stored configs
 declare -A pkg_conf_map
-pkg_conf_map["neovim"]="$HOME/.dotfiles/base_configs/nvim"
-pkg_conf_map["tmux"]="$HOME/.dotfiles/base_configs/tmux/$THEME.conf"
+pkg_conf_map["neovim"]="$REPO_DIR/base_configs/nvim"
+pkg_conf_map["tmux"]="$REPO_DIR/base_configs/tmux/$THEME.conf"
 
 main() {
     for pkg in "${pkg_list[@]}"; do

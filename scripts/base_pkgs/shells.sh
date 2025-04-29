@@ -27,7 +27,7 @@ conf_path_map["zsh"]="$HOME/.zshrc"
 
 # --------------- map dotfiles to pkg names
 declare -A pkg_conf_map
-pkg_conf_map["zsh"]="$HOME/.dotfiles/base_configs/shells/zsh/base.zsh"
+pkg_conf_map["zsh"]="$REPO_DIR/base_configs/shells/zsh/base.zsh"
 
 # --------------- map packages to repo names
 declare -A pkg_name_map
@@ -87,7 +87,7 @@ while true; do
     else
         # standard handling
         shell="${shells[@]}"
-        echo -e "${green}Marking $shell as the default shell"    
+        echo -e "${green}Marking $shell as the default shell${color_end}"    
         sudo chsh -s "/bin/$shell"
         break
     fi

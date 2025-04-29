@@ -55,9 +55,9 @@ pkg_name_map["tealdeer"]="app-misc/tealdeer"
 
 # -------------- map dotfiles to package names
 declare -A pkg_conf_map
-pkg_conf_map["bottom"]="$HOME/.dotfiles/base_configs/cli/bottom/$THEME.toml"
-pkg_conf_map["eza"]="$HOME/.dotfiles/base_configs/cli/eza/$THEME.yml"
-pkg_conf_map["fastfetch"]="$HOME/.dotfiles/base_configs/cli/fastfetch/$THEME.jsonc"
+pkg_conf_map["bottom"]="$REPO_DIR/base_configs/cli/bottom/$THEME.toml"
+pkg_conf_map["eza"]="$REPO_DIR/base_configs/cli/eza/$THEME.yml"
+pkg_conf_map["fastfetch"]="$REPO_DIR/base_configs/cli/fastfetch/$THEME.jsonc"
 
 
 #===================================#

@@ -113,7 +113,7 @@ export color_end=$end
 export gum="$HOME/go/bin/gum"
 
 # ------ common functions
-for script in "$HOME/.dotfiles/scripts/functions/"*; do
+for script in "$REPO_DIR/scripts/functions/"*; do
     source "$script"
 done
 
@@ -162,17 +162,17 @@ echo -e "\n"
 
 # --------------- git config
 echo "First things first, lets make sure Git is configured"
-$HOME/.dotfiles/scripts/base_pkgs/git.sh
+$REPO_DIR/scripts/base_pkgs/git.sh
 
 # --------------- Base system packages before moving to profile specific
 echo "Installing base system packages..."
-$HOME/.dotfiles/scripts/base_pkgs/system_packages.sh
+$REPO_DIR/scripts/base_pkgs/system_packages.sh
 
 echo "Installing CLI tools..."
-$HOME/.dotfiles/scripts/base_pkgs/cli.sh
+$REPO_DIR/scripts/base_pkgs/cli.sh
 
 echo "Adding services..."
-$HOME/.dotfiles/scripts/base_pkgs/services.sh
+$REPO_DIR/scripts/base_pkgs/services.sh
 
 # --------------- theme file creation 
 echo "Creating file to store theme value."
@@ -194,7 +194,7 @@ done
 echo "$THEME" > "$theme_file"
 
 # --------------- shell select
-$HOME/.dotfiles/scripts/base_pkgs/shells.sh
+$REPO_DIR/scripts/base_pkgs/shells.sh
 
 #======(PROFILE SPECIFIC)======#
 

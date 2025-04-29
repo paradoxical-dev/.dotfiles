@@ -59,10 +59,14 @@ fi
 sudo emerge --ask "net-misc/networkmanager"
 echo -e "\n"
 
-#----------- check for and remove dhcpcd
+#----------- check for and remove dhcpcd service
 if $pkg_exists dhcpcd; then
-   echo "dhcpcd package found. Removing from default rc-service list" 
-   rc-service del dhcpcd default
+   gum_confirm "dhcpcd package found. Remove from default service list?" 
+   remove=$?
+   if [[ $remove -eq 0 ]]; then
+       echo "Removing dhcpcd from default services..."
+       rc-service del dhcpcd default
+   fi
    echo -e "\n"
 fi
 

@@ -1,4 +1,4 @@
 #!/bin/bash
 
 echo "Installing hardware packages..."
-$PROFILE_BASE_DIR/scripts/hardware/hardware.sh
+$PROFILE_BASE_DIR/scripts/hardware.sh

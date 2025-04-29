@@ -153,7 +153,7 @@ edit_use() {
         added_flags+=("$flag")
         echo -e "Including flag $flag"
     }
-    choose_multi "Choose which flags to ADD at build time" cb "${flags[@]}"
+    choose_multi "Choose which flags to ADD at build time" cb $flags
     unset -f cb
 
     echo -e "\n"
@@ -163,8 +163,9 @@ edit_use() {
     cb() {
         local flag="$1"
         removed_flags+=("$flag")
+        echo -e "Removing flag $flag"
     }
-    choose_multi "Choose which flags to REMOVE at build time" cb "${flags[@]}"
+    choose_multi "Choose which flags to REMOVE at build time" cb $flags
     unset -f cb
 
     # create master string to include in package.use file
@@ -179,7 +180,7 @@ edit_use() {
 
     if [ $confirm -eq 0 ]; then
         echo -e "${yellow}Copying flag modifications to /etc/portage/package.use/$pkg${color_end}..."
-        echo "$pkg_repo $r $a" | sudo tee -a "/etc/portage/package.use/${pkg}" > /dev/null
+        echo "$pkg_repo $r $a" | sudo tee "/etc/portage/package.use/${pkg}" > /dev/null
         echo -e "\n"
         echo -e "${green}Successfully added custom USE to $pkg${color_end}"
     else
