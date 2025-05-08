@@ -145,6 +145,7 @@ edit_use() {
     echo -e "${cyan}The following are the default flags $pkg will be installed with${color_end}"
     echo -e "\n"
     echo "$default_flags"
+    echo -e "\n"
 
     # mark flags to include
     local added_flags=()
@@ -169,7 +170,11 @@ edit_use() {
     unset -f cb
 
     # create master string to include in package.use file
-    local r=$(printf -- '-%s ' "${removed_flags[@]}")
+    if [ ${#removed_flags[@]} -eq 0 ]; then
+        local r=" "    
+    else
+        local r=$(printf -- '-%s ' "${removed_flags[@]}")
+    fi
     local a=$(printf -- '%s ' "${added_flags[@]}")
     # remove trailing whitespace
     r=${r::-1}
@@ -180,7 +185,7 @@ edit_use() {
 
     if [ $confirm -eq 0 ]; then
         echo -e "${yellow}Copying flag modifications to /etc/portage/package.use/$pkg${color_end}..."
-        echo "$pkg_repo $r $a" | sudo tee "/etc/portage/package.use/${pkg}" > /dev/null
+        echo "$pkg_repo $a $r" | sudo tee "/etc/portage/package.use/${pkg}" > /dev/null
         echo -e "\n"
         echo -e "${green}Successfully added custom USE to $pkg${color_end}"
     else

@@ -1,10 +1,14 @@
 #!/bin/bash
 
+if pkg_exists networkmanager; then
+    echo -e "${green}networkmanager already installed"
+    exit 0
+fi
+
 #----------- initial warning
 inform_msg "WARNING" "It is highly recommended to add the 'networkmanager' USE flag globally to allow other networkmanager in other packages"
-sleep 3
+sleep 2
 
-# TODO: add flags
 #----------- define available USE flags
 flags=(
     "concheck"

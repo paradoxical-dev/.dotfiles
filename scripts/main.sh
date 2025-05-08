@@ -1,7 +1,5 @@
 #!/bin/bash
 
-# TODO: Refactor and replace hardcoded paths with vars
-
 #==============================#
 #            SETUP             #
 #==============================#
