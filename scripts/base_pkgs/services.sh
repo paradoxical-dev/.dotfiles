@@ -12,7 +12,8 @@ services=(
 
 for service in "${services[@]}"; do
     echo -e "\n"
-    add_service "$service"
+    add_service "$service" "default"
+    echo -e "\n"
 done
 
 if [ $LAPTOP -eq 0 ]; then
@@ -20,7 +21,7 @@ if [ $LAPTOP -eq 0 ]; then
     if ! pkg_exists "tlp"; then
         echo -e "${cyan}Installing TLP for power optimizations...${color_end}"
         sudo emerge --ask --noreplace "sys-power/tlp"
-        add_service "tlp"
+        add_service "tlp" "default"
         sudo tlp start
     else
         echo -e "${green}TLP already installed...${color_end}"
@@ -32,6 +33,6 @@ if ! pkg_exists "elogind"; then
     install=$?
     if [ $install -eq 0 ]; then
         sudo emerge --ask "sys-auth/elogind"
-        sudo rc-update add elogind boot
+        add_service "elogind" "boot"
     fi
 fi

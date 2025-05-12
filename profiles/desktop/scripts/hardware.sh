@@ -2,15 +2,15 @@
 
 # INFO: This is the main file called to consolidate hardware related packages
 
-HARDWARE_PATH="$PROFILE_BASE_DIR/scripts/hardware/"
+export HARDWARE_PATH="$PROFILE_BASE_DIR/scripts/hardware/"
 
 echo "Installing wireless packages..."
+echo -e "\n"
 $HARDWARE_PATH/wireless.sh
 echo -e "\n"
 
-echo "Installing pipewire for audio and video..."
-$HARDWARE_PATH/pipewire.sh
+# TODO: Potentially need more for audio output
+echo "Installing audio and video packages..."
 echo -e "\n"
-
-# echo "Installing packages for bluetooth functionality..."
-# $HARDWARE_PATH/bluetooth.sh
+$HARDWARE_PATH/audio.sh
+echo -e "\n"

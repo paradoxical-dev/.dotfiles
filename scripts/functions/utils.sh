@@ -99,9 +99,18 @@ handle_backups(){
 # @param (string) service name
 add_service() {
     local name="$1"
-    echo -e "${cyan}Starting service $name and adding to default${color_end}"
+    local desired_level="$2"
+
+    # check if service is already added
+    local run_level=$(rc-update show | awk -v svc="$name" '$1 == svc { print $3 }')
+    if [[ "$run_level" == "$desired_level" ]]; then
+        echo "$name already at run level $desired_level"
+        return 0
+    fi
+
+    echo -e "${cyan}Starting service $name and adding to $desired_level${color_end}"
     sudo rc-service "$name" start
-    sudo rc-update add "$name" default
+    sudo rc-update add "$name" "$desired_level"
 }
 
 # Prompt the user to unmask package with given keyword(s)

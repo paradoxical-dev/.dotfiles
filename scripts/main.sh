@@ -15,6 +15,7 @@ THEME=""
 LAPTOP=1
 
 # --------------- grab the passed options
+# TODO: add skip all flag
 while [[ $# -gt 0 ]]; do
     case "$1" in
         --profile)
@@ -161,16 +162,20 @@ echo -e "\n"
 # --------------- git config
 echo "First things first, lets make sure Git is configured"
 $REPO_DIR/scripts/base_pkgs/git.sh
+echo -e "\n"
 
 # --------------- Base system packages before moving to profile specific
 echo "Installing base system packages..."
 $REPO_DIR/scripts/base_pkgs/system_packages.sh
+echo -e "\n"
 
 echo "Installing CLI tools..."
 $REPO_DIR/scripts/base_pkgs/cli.sh
+echo -e "\n"
 
 echo "Adding services..."
 $REPO_DIR/scripts/base_pkgs/services.sh
+echo -e "\n"
 
 # --------------- theme file creation 
 echo "Creating file to store theme value."
@@ -193,9 +198,11 @@ echo "$THEME" > "$theme_file"
 
 # --------------- shell select
 $REPO_DIR/scripts/base_pkgs/shells.sh
+echo -e "\n"
 
 #======(PROFILE SPECIFIC)======#
 
 echo "Lets begin installing the base packages for your $DEVICE_TYPE device..."
 echo -e "\n"
 $PROFILE_BASE_DIR/scripts/base.sh
+echo -e "\n"
