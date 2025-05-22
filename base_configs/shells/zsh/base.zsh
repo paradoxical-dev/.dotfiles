@@ -129,6 +129,9 @@ alias gg="lazygit"
 
 #=== THEME CONTROL ===#
 export SYSTEM_THEME=$(cat "$HOME/.system-theme")
+
+#=== NVIM MANPAGER ===#
+export MANPAGER='nvim +Man!'
                                       
 
 #============================#

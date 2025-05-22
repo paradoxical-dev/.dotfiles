@@ -12,6 +12,7 @@ REPO_DIR="$(dirname "$SCRIPT_DIR")"
 PROFILE=""
 PROFILE_DIR=""
 THEME=""
+EDIT_USE=0
 LAPTOP=1
 
 # --------------- grab the passed options
@@ -36,10 +37,14 @@ while [[ $# -gt 0 ]]; do
 	    echo "  "
 	    exit 0
 	;;
-    --laptop)
-        LAPTOP=0
-        shift
-    ;;
+  --laptop)
+      LAPTOP=0
+      shift
+  ;;
+  --no-edit-use)
+      EDIT_USE=1
+      shift
+  ;;
 	*)
 	    echo "Unknown option: $1"
 	    exit 1

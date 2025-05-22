@@ -143,6 +143,11 @@ unmask_package() {
 # @param (string) package repo name
 # @param (string | list) available flags
 edit_use() {
+    # return if no-edit-use flag is present
+    if [ "$EDIT_USE" -eq 1 ]; then
+      return 0
+    fi
+
     local pkg="$1"
     local pkg_repo="$2"
     shift 2
