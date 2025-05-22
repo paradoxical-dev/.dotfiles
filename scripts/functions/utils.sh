@@ -29,14 +29,17 @@ dynamic_copy() {
     fi
 }
 
-# TODO: Add support for optional custom build cb
-
 # Handle cases where backups may be necessary
 # ---
 # @param {string} package name
 # @param {string} path to potential user config file
 # @param {string} path to the stored config file
 handle_backups(){
+    # skip backups if flag provided
+    if [ $SKIP_BACKUPS -eq 0 ]; then
+        return 0
+    fi
+
     local pkg="$1"
     local conf_path="$2"
     local dot_file="$3"
@@ -50,7 +53,7 @@ handle_backups(){
                 config_exists=0
             fi
         done
-        
+
         if [ $config_exists -eq 0 ]; then
 
             # callback to handle the users backup preference
@@ -88,11 +91,11 @@ handle_backups(){
             # continue config if no user config present and stored config exists
             echo "Copying config file $dot_file to $conf_path..."
             dynamic_copy "$dot_file" "$conf_path"
+            fi
+        else
+            echo "No config file required for $pkg"
         fi
-    else
-        echo "No config file required for $pkg"
-    fi
-}
+    }
 
 # Add service to open-rc default and start in current session
 # ---
@@ -145,7 +148,7 @@ unmask_package() {
 edit_use() {
     # return if no-edit-use flag is present
     if [ "$EDIT_USE" -eq 1 ]; then
-      return 0
+        return 0
     fi
 
     local pkg="$1"

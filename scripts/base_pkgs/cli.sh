@@ -229,7 +229,7 @@ handle_edge() {
     local case="$1"
     if [[ "$case" == "ddgr" ]]; then
         if pkg_exists "ddgr"; then
-            echp -e "${green}ddgr already installed"
+            echp -e "${green}ddgr already installed${color_end}"
         else
             ddgr_build
         fi

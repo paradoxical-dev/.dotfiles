@@ -14,12 +14,30 @@ PROFILE_DIR=""
 THEME=""
 EDIT_USE=0
 LAPTOP=1
+SKIP_BACKUPS=1
 
 # --------------- grab the passed options
 # TODO: add skip all flag
 while [[ $# -gt 0 ]]; do
     case "$1" in
-        --profile)
+    --help)
+        echo "Usage: <repo name>/scripts/main.sh [OPTIONS]"
+        echo ""
+        echo "Options:"
+        echo "  --profile <name>        Specify the profile to use (e.g., desktop/hypr, server/minimal)."
+        echo "  --theme <name>          Specify the theme to apply (default: echelon)"
+        echo "  --laptop                Apply laptop-specific configuration tweaks."
+        echo "  --no-edit-use           Skip prompting to edit USE flags for certain packages."
+        echo "  --skip-backups          Skip prompt for backups. Using this flag will not copy over any configuratio files if ones already exist."
+        echo "  --list-profiles         List available profiles by category and exit."
+        echo "  --help                  Show this help message and exit."
+        echo ""
+        echo "Examples:"
+        echo "  .dotfiles/scripts/main.sh --profile desktop/hypr --theme echelon --laptop"
+        echo "  ./main.sh --list-profiles"
+        exit 0
+    ;;
+    --profile)
 	    PROFILE="$2"    
 	    shift 2
 	;;
@@ -37,15 +55,19 @@ while [[ $# -gt 0 ]]; do
 	    echo "  "
 	    exit 0
 	;;
-  --laptop)
-      LAPTOP=0
-      shift
-  ;;
-  --no-edit-use)
-      EDIT_USE=1
-      shift
-  ;;
-	*)
+    --laptop)
+        LAPTOP=0
+        shift
+    ;;
+    --no-edit-use)
+        EDIT_USE=1
+        shift
+    ;;
+    --skip-backups)
+        SKIP_BACKUPS=0
+        shift
+    ;;
+    *)
 	    echo "Unknown option: $1"
 	    exit 1
 	;;
@@ -95,6 +117,8 @@ export DEVICE_TYPE="${PROFILE%%/*}"
 export PROFILE_VARIANT="${PROFILE#*/}"
 export THEME=$THEME
 export LAPTOP=$LAPTOP
+export EDIT_USE=$EDIT_USE
+export SKIP_BACKUPS=$SKIP_BACKUPS
 export CONFIG_DIR=$CONFIG_DIR
 
 # ------ paths
