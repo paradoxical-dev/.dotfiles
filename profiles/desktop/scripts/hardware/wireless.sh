@@ -1,6 +1,5 @@
 #!/bin/bash
 
-echo -e "\n"
 echo "Installing networkmanager for wireless support..."
 echo -e "\n"
 $HARDWARE_PATH/wireless/nm.sh
