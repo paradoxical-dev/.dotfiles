@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# TODO: Move neovim config to its own repo
+
 #==============================#
 #            SETUP             #
 #==============================#
@@ -17,7 +19,6 @@ LAPTOP=1
 SKIP_BACKUPS=1
 
 # --------------- grab the passed options
-# TODO: add skip all flag
 while [[ $# -gt 0 ]]; do
     case "$1" in
     --help)
@@ -88,9 +89,19 @@ if [[ ! -d "$PROFILE_DIR" ]]; then
     exit 1
 fi
 
-# TODO: Add themes list and check if theme is available
+themes=(
+    "echelon"
+)
 if [[ -z "$THEME" ]]; then
-    echo "No theme set. Using default 'echelon' configurations..."
+    THEME="echelon"
+    echo "No theme set. Using default '$THEME' configurations..."
+else
+    # check for provided theme
+    if [[ ! " ${themes[*]} " =~ " $THEME " ]]; then
+        echo "Error: Unknown theme '$THEME'."
+        echo "Available themes: ${themes[*]}"
+        exit 1
+    fi
 fi
 
 CONFIG_DIR=$(echo $XDG_CONFIG_HOME)
