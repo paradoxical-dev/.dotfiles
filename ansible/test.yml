@@ -1,0 +1,11 @@
+- name: Install Neovim on Gentoo
+  hosts: localhost
+  become: true
+  tasks:
+    - name: Ensure Neovim is installed
+      ansible.builtin.command:
+        cmd: emerge --ask=n app-editors/neovim
+      args:
+        warn: false
+      register: result
+      changed_when: "'emerge' in result.cmd"
