@@ -1,11 +1,18 @@
-- name: Install Neovim on Gentoo
+- name: Local Gentoo Post-Install Test
   hosts: localhost
   become: true
+  gather_facts: false
+
   tasks:
-    - name: Ensure Neovim is installed
-      ansible.builtin.command:
-        cmd: emerge --ask=n app-editors/neovim
-      args:
-        warn: false
-      register: result
-      changed_when: "'emerge' in result.cmd"
+    - name: Run local script with live output
+      ansible.builtin.script: scripts/install_hello.sh
+
+    - name: Create a config file using Ansible logic
+      ansible.builtin.copy:
+        dest: /tmp/hello.conf
+        content: |
+          installed_by = ansible
+
+    - name: Show confirmation
+      ansible.builtin.debug:
+        msg: "Post-install test complete. Config file created at /tmp/hello.conf."

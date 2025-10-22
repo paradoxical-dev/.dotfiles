@@ -8,12 +8,12 @@
 
 set -e
 
+yellow="\e[1;33m"
+color_end="\e[1;0m"
+
 pkg_exists() {
     qlist -I "$1" &> /dev/null || command -v "$1" &> /dev/null
 }
-
-yellow="\e[1;33m"
-color_end="\e[1;0m"
 
 if ! pkg_exists "ansible"; then
     echo -e "${yellow}ansible not yet installed.\n${color_end}"
@@ -23,7 +23,7 @@ fi
 
 # TODO:  will need to be changed once scripts dir is mergerd to main repo
 ANSIBLE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-
 cd "$ANSIBLE_DIR"
 
-ansible-playbook test.yml
+ansible-playbook --ask-become-pass test.yml
+
